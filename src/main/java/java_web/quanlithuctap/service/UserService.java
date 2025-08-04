@@ -11,8 +11,8 @@ public interface UserService {
     UserResponse register(RegisterRequest request);
     UserResponse getCurrentUser();
     List<UserResponse> getAll();
-    UserResponse getById(Long id);
-    void updateActive(Long id);
-    void update(UserResponse user);
-    void updateRole(Long id, String role);
+    UserResponse getById(Integer id);
+    void update(Integer id, UserResponse user);
+    void updateRole(Integer id, String role);
+    void delete(Integer id);
 }

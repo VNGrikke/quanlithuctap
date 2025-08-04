@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -15,19 +16,22 @@ import java.time.LocalDateTime;
 public class Mentor {
 
     @Id
-    @Column(name = "MentorID")
-    private Integer id;
+    @Column(name = "mentor_id")
+    private Integer mentorId;
 
     @OneToOne
     @MapsId
-    @JoinColumn(name = "MentorID")
+    @JoinColumn(name = "mentor_id")
     private User user;
 
-    @Column(name = "Department", length = 100)
+    @Column(name = "department", length = 100)
     private String department;
 
-    @Column(name = "AcademicRank", length = 50)
+    @Column(name = "academic_rank", length = 50)
     private String academicRank;
+
+    @OneToMany(mappedBy = "mentor")
+    private List<Student> students;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
     @Column(name = "CreatedAt", updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

@@ -1,11 +1,16 @@
 package java_web.quanlithuctap.service;
 
-import java_web.quanlithuctap.entity.Student;
+import java_web.quanlithuctap.dto.StudentRequest;
+import java_web.quanlithuctap.dto.StudentResponse;
 
-import java.util.Optional;
+import java.util.List;
 
 public interface StudentService {
-    Student create(Student student);
-    Optional<Student> findById(Integer id);
-    Optional<Student> findByStudentCode(String code);
+    List<StudentResponse> getAll();
+
+    StudentResponse getById(Integer id);
+
+    StudentResponse create(StudentRequest request);
+
+    StudentResponse update(Integer id, StudentRequest request);
 }

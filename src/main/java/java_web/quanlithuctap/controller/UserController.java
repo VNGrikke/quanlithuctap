@@ -45,8 +45,37 @@ public class UserController {
 
     @GetMapping("/users/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponse> getUser(@PathVariable Long id) {
+    public ResponseEntity<UserResponse> getUser(@PathVariable Integer id) {
         return ResponseEntity.ok(userService.getById(id));
     }
+
+    @PutMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> updateUser(@PathVariable Integer id, @RequestBody @Valid UserResponse user) {
+        userService.update(id, user);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/users/{id}/role")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> updateRole(@PathVariable Integer id,@RequestParam("role") String role) {
+        userService.updateRole(id, role);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/users/{id}/active")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> updateActive(@PathVariable Integer id) {
+        userService.update(id, userService.getById(id));
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
+        userService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }
 

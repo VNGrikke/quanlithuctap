@@ -16,28 +16,32 @@ import java.time.LocalDateTime;
 public class Student {
 
     @Id
-    @Column(name = "StudentID")
-    private Integer id;
+    @Column(name = "student_id")
+    private Integer studentId;
 
     @OneToOne
     @MapsId
-    @JoinColumn(name = "StudentID")
+    @JoinColumn(name = "student_id")
     private User user;
 
-    @Column(name = "StudentCode", length = 20, nullable = false, unique = true)
+    @Column(name = "student_code", nullable = false, unique = true, length = 20)
     private String studentCode;
 
-    @Column(name = "Major", length = 100)
+    @Column(name = "major", length = 100)
     private String major;
 
-    @Column(name = "Class", length = 50)
-    private String className;
+    @Column(name = "class", length = 50)
+    private String studentClass;
 
-    @Column(name = "DateOfBirth")
+    @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
-    @Column(name = "Address", length = 255)
+    @Column(name = "address", length = 255)
     private String address;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mentor_id")
+    private Mentor mentor;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "CreatedAt", updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

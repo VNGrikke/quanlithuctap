@@ -3,28 +3,31 @@ package java_web.quanlithuctap.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "evaluation_criteria")
+@Table(name = "internship_phases")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EvaluationCriteria {
+public class InternshipPhase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer criterionId;
+    private Integer phaseId;
 
     @Column(nullable = false, unique = true)
-    private String criterionName;
-
-    private String description;
+    private String phaseName;
 
     @Column(nullable = false)
-    private BigDecimal maxScore;
+    private LocalDate startDate;
+
+    @Column(nullable = false)
+    private LocalDate endDate;
+
+    private String description;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
