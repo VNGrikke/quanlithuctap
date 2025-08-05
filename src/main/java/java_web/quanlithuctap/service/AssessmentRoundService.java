@@ -9,4 +9,5 @@ public interface AssessmentRoundService {
     AssessmentRoundDTO getById(Integer id);
     AssessmentRoundDTO create(AssessmentRoundDTO dto);
     void update(Integer id, AssessmentRoundDTO dto);
+    void delete(Integer id);
 }

@@ -3,6 +3,7 @@ package java_web.quanlithuctap.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -32,7 +33,28 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/register").hasRole("ADMIN")
+
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET,"/api/students").hasAnyRole("ADMIN", "MENTOR")
+                        .requestMatchers(HttpMethod.GET,"/api/students/*").hasAnyRole("ADMIN", "MENTOR")
+                        .requestMatchers(HttpMethod.POST,"/api/students").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,"/api/students/*").hasAnyRole("ADMIN", "STUDENT")
+
+                        .requestMatchers(HttpMethod.GET,"/api/mentors").hasAnyRole("ADMIN", "STUDENT")
+                        .requestMatchers(HttpMethod.GET,"/api/mentors/*").hasRole("MENTOR")
+                        .requestMatchers(HttpMethod.POST,"/api/mentors").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/mentors/*").hasAnyRole("ADMIN", "MENTOR")
+
+                        .requestMatchers(HttpMethod.GET, "/api/internship_phases/**").hasAnyRole("ADMIN", "MENTOR", "STUDENT")
+                        .requestMatchers(HttpMethod.POST, "/api/internship_phases").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/internship_phases/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/internship_phases/**").hasRole("ADMIN")
+
+                        .requestMatchers("/api/evaluation_criteria/**").hasAnyRole("ADMIN", "MENTOR", "STUDENT")
+
+                        .requestMatchers("/api/assessment_rounds/**").hasAnyRole("ADMIN", "MENTOR", "STUDENT")
+
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception
@@ -43,6 +65,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
+
 
 
     @Bean

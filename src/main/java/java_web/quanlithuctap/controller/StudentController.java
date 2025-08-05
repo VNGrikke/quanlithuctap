@@ -1,5 +1,6 @@
 package java_web.quanlithuctap.controller;
 
+import jakarta.validation.Valid;
 import java_web.quanlithuctap.dto.StudentRequest;
 import java_web.quanlithuctap.dto.StudentResponse;
 import java_web.quanlithuctap.service.StudentService;
@@ -31,13 +32,15 @@ public class StudentController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<StudentResponse> create(@RequestBody StudentRequest request) {
+    public ResponseEntity<StudentResponse> create(@RequestBody @Valid StudentRequest request) {
         return ResponseEntity.status(201).body(studentService.create(request));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','STUDENT')")
-    public ResponseEntity<StudentResponse> update(@PathVariable Integer id, @RequestBody StudentRequest request) {
-        return ResponseEntity.ok(studentService.update(id, request));
+    public ResponseEntity<Void> update(@PathVariable Integer id, @RequestBody @Valid StudentRequest request) {
+        studentService.update(id, request);
+        return ResponseEntity.noContent().build();
     }
+
 }

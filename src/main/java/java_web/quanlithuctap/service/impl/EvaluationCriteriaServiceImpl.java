@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 @Service
 @RequiredArgsConstructor
@@ -28,6 +29,8 @@ public class EvaluationCriteriaServiceImpl implements EvaluationCriteriaService 
     @Override
     public EvaluationCriteriaDTO create(EvaluationCriteriaDTO dto) {
         EvaluationCriteria entity = toEntity(dto);
+        entity.setCreatedAt(LocalDate.now());
+        entity.setUpdatedAt(LocalDate.now());
         return toDto(repository.save(entity));
     }
 
@@ -35,6 +38,7 @@ public class EvaluationCriteriaServiceImpl implements EvaluationCriteriaService 
     public void update(Integer id, EvaluationCriteriaDTO dto) {
         EvaluationCriteria criteria = repository.findById(id).orElseThrow();
         criteria.setCriterionName(dto.getCriterionName());
+        criteria.setUpdatedAt(LocalDate.now());
         criteria.setDescription(dto.getDescription());
         criteria.setMaxScore(dto.getMaxScore());
         repository.save(criteria);

@@ -32,10 +32,8 @@
 //
 //    @ManyToOne(optional = false)
 //    @JoinColumn(name = "PhaseID", nullable = false)
-//    private InternshipPhases phase;
+//    private InternshipPhase phase;
 //
-//    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
-//    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
 //    @Column(name = "AssignedDate", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 //    private LocalDateTime assignedDate;
 //
@@ -43,8 +41,6 @@
 //    @Column(name = "Status", nullable = false, length = 20)
 //    private AssignmentStatus status = AssignmentStatus.PENDING;
 //
-//    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
-//    @DateTimeFormat(pattern = "dd-MM-yyyy HH:mm:ss")
 //    @Column(name = "CreatedAt", updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 //    private LocalDateTime createdAt;
 //

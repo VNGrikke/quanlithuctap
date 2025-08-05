@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -37,6 +38,7 @@ public class InternshipPhaseServiceImpl implements InternshipPhaseService {
         InternshipPhase entity = repository.findById(id).orElseThrow();
         entity.setPhaseName(dto.getPhaseName());
         entity.setStartDate(dto.getStartDate());
+        entity.setUpdatedAt(LocalDate.now());
         entity.setEndDate(dto.getEndDate());
         entity.setDescription(dto.getDescription());
         repository.save(entity);
@@ -55,6 +57,8 @@ public class InternshipPhaseServiceImpl implements InternshipPhaseService {
 
     private InternshipPhase toEntity(InternshipPhaseDTO dto) {
         InternshipPhase phase = new InternshipPhase();
+        phase.setCreatedAt(LocalDate.now());
+        phase.setUpdatedAt(LocalDate.now());
         BeanUtils.copyProperties(dto, phase);
         return phase;
     }

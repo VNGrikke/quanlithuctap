@@ -5,7 +5,6 @@ import java_web.quanlithuctap.dto.RegisterRequest;
 import java_web.quanlithuctap.dto.UserResponse;
 import java_web.quanlithuctap.entity.User;
 import java_web.quanlithuctap.exception.ConflictException;
-import java_web.quanlithuctap.mapper.UserMapper;
 import java_web.quanlithuctap.repository.UserRepository;
 import java_web.quanlithuctap.service.UserService;
 import java_web.quanlithuctap.util.JwtUtils;
@@ -25,8 +24,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepo;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
-    private final UserMapper userMapper;
-
 
     @Override
     public String login(LoginRequest request) {
@@ -37,9 +34,6 @@ public class UserServiceImpl implements UserService {
         }
         return jwtUtils.generateAccessToken(user.getUsername(), user.getRole().name());
     }
-
-
-
 
     @Override
     public UserResponse register(RegisterRequest request) {
@@ -59,79 +53,38 @@ public class UserServiceImpl implements UserService {
                 .phoneNumber(request.getPhoneNumber())
                 .role(User.Role.valueOf(request.getRole().toUpperCase()))
                 .isActive(true)
-                .createdAt(LocalDate.now().atStartOfDay())
-                .updatedAt(LocalDate.now().atStartOfDay())
+                .createdAt(LocalDate.now())
+                .updatedAt(LocalDate.now())
                 .build();
 
         userRepo.save(user);
-        return userMapper.toDto(user);
+        return toDto(user);
     }
+
     @Override
     public UserResponse getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepo.findByUsername(username)
-                .map(this::mapToResponse)
-                .orElseThrow();
+                .map(this::toDto)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
     }
 
     @Override
     public List<UserResponse> getAll() {
-        return userRepo.findAll()
-                .stream()
-                .map(this::mapToResponse)
+        return userRepo.findAll().stream()
+                .map(this::toDto)
                 .toList();
     }
 
     @Override
     public UserResponse getById(Integer id) {
         return userRepo.findById(id)
-                .map(this::mapToResponse)
-                .orElseThrow();
+                .map(this::toDto)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
     }
 
-//    @Override
-//    public void updateActive(Integer id) {
-//        User user = userRepo.findById(id)
-//                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-//        if (user.getRole() != User.Role.ADMIN) {
-//            throw new IllegalArgumentException("User must have ADMIN role");
-//        }
-//        if (user.getIsActive()) {
-//            throw new IllegalArgumentException("User is already active");
-//        }else {
-//            user.setIsActive(true);
-//            userRepo.save(user);
-//        }
-//    }
-
     @Override
-    public void update(Integer id, UserResponse user) {
-        // Lấy user đang đăng nhập
-        UserResponse currentUser = getCurrentUser();
-
-        // Kiểm tra quyền ADMIN
-        if (!"ADMIN".equalsIgnoreCase(currentUser.getRole())) {
-            throw new IllegalArgumentException("Bạn không có quyền cập nhật người dùng khác.");
-        }
-
-        // Lấy user trong DB
-        User userDb = userRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        // Cập nhật thông tin
-        userDb.setUsername(user.getUsername());
-        userDb.setFullName(user.getFullName());
-        userDb.setEmail(user.getEmail());
-        userDb.setPhoneNumber(user.getPhoneNumber());
-        userDb.setUpdatedAt(LocalDate.now().atStartOfDay());
-
-
-        userRepo.save(userDb);
-    }
-
-
-    @Override
-    public void updateRole(Integer id, String role) {
+    public void update(Integer id, UserResponse request) {
         UserResponse currentUser = getCurrentUser();
 
         if (!"ADMIN".equalsIgnoreCase(currentUser.getRole())) {
@@ -141,19 +94,40 @@ public class UserServiceImpl implements UserService {
         User user = userRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        User.Role newRole;
-        try {
-            newRole = User.Role.valueOf(role.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Role không hợp lệ: " + role);
+        user.setUsername(request.getUsername());
+        user.setFullName(request.getFullName());
+        user.setEmail(request.getEmail());
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setUpdatedAt(LocalDate.now());
+
+        userRepo.save(user);
+    }
+
+    @Override
+    public void updateRole(Integer id, String role) {
+        UserResponse currentUser = getCurrentUser();
+
+        if (!"ADMIN".equalsIgnoreCase(currentUser.getRole())) {
+            throw new IllegalArgumentException("Bạn không có quyền cập nhật role người dùng khác.");
         }
+
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        User.Role newRole = switch (role.toUpperCase()) {
+            case "ADMIN" -> User.Role.ADMIN;
+            case "MENTOR" -> User.Role.MENTOR;
+            case "STUDENT" -> User.Role.STUDENT;
+            default -> throw new IllegalArgumentException("Role không hợp lệ: " + role);
+        };
 
         if (user.getRole() == newRole) {
             throw new IllegalArgumentException("Role đã là " + newRole.name());
         }
 
         user.setRole(newRole);
-        user.setUpdatedAt(LocalDate.now().atStartOfDay());
+        user.setUpdatedAt(LocalDate.now());
+
         userRepo.save(user);
     }
 
@@ -163,14 +137,18 @@ public class UserServiceImpl implements UserService {
         if (!"ADMIN".equalsIgnoreCase(currentUser.getRole())) {
             throw new IllegalArgumentException("Bạn không có quyền xóa người dùng khác.");
         }
-        User user = userRepo.findById(id).
-                orElseThrow(() -> new IllegalArgumentException("User not found")) ;
+
+        User user = userRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
         user.setIsActive(false);
+        user.setUpdatedAt(LocalDate.now());
+
         userRepo.save(user);
     }
 
-
-    private UserResponse mapToResponse(User user) {
+    // ✅ Chuyển entity → response DTO
+    private UserResponse toDto(User user) {
         return UserResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -181,4 +159,3 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 }
-

@@ -10,12 +10,15 @@ import java_web.quanlithuctap.service.MentorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class MentorServiceImpl implements MentorService {
 
     private final MentorRepository mentorRepo;
@@ -23,7 +26,9 @@ public class MentorServiceImpl implements MentorService {
 
     @Override
     public List<MentorResponse> getAll() {
-        return mentorRepo.findAll().stream().map(this::toDto).collect(Collectors.toList());
+        return mentorRepo.findAll().stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -53,8 +58,10 @@ public class MentorServiceImpl implements MentorService {
 
         Mentor mentor = Mentor.builder()
                 .mentorId(user.getId())
-                .user(user)
+                .user(user)  // user là entity được quản lý bởi Hibernate
                 .department(request.getDepartment())
+                .createdAt(LocalDate.now())
+                .updatedAt(LocalDate.now())
                 .academicRank(request.getAcademicRank())
                 .build();
 
@@ -65,16 +72,21 @@ public class MentorServiceImpl implements MentorService {
     @Override
     public void updateMentor(Integer id, MentorRequest request) {
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        Mentor mentor = mentorRepo.findById(id).orElseThrow();
+
+        Mentor mentor = mentorRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Mentor không tồn tại"));
+
+        User currentUser = userRepo.findByUsername(currentUsername)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
 
         if (!mentor.getUser().getUsername().equals(currentUsername)
-                && !userRepo.findByUsername(currentUsername).get().getRole().equals(User.Role.ADMIN)) {
+                && !currentUser.getRole().equals(User.Role.ADMIN)) {
             throw new RuntimeException("Bạn không có quyền cập nhật mentor này");
         }
 
         mentor.setDepartment(request.getDepartment());
         mentor.setAcademicRank(request.getAcademicRank());
-        mentorRepo.save(mentor);
+        mentor.setUpdatedAt(LocalDate.now());
     }
 
     private MentorResponse toDto(Mentor m) {

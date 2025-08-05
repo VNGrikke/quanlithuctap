@@ -9,6 +9,7 @@ import java_web.quanlithuctap.service.AssessmentRoundService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -41,6 +42,8 @@ public class AssessmentRoundServiceImpl implements AssessmentRoundService {
                 .phase(phase)
                 .roundName(dto.getRoundName())
                 .startDate(dto.getStartDate())
+                .createdAt(LocalDate.now())
+                .updatedAt(LocalDate.now())
                 .endDate(dto.getEndDate())
                 .description(dto.getDescription())
                 .isActive(true)
@@ -56,10 +59,20 @@ public class AssessmentRoundServiceImpl implements AssessmentRoundService {
         round.setRoundName(dto.getRoundName());
         round.setStartDate(dto.getStartDate());
         round.setEndDate(dto.getEndDate());
+        round.setUpdatedAt(LocalDate.now());
         round.setDescription(dto.getDescription());
         round.setIsActive(dto.getIsActive());
 
         repository.save(round);
+    }
+
+    @Override
+    public void delete(Integer id) {
+        AssessmentRound round = repository.findById(id).orElseThrow();
+        round.setIsActive(false);
+        round.setUpdatedAt(LocalDate.now());
+        repository.save(round);
+        repository.deleteById(id);
     }
 
     private AssessmentRoundDTO toDto(AssessmentRound r) {
