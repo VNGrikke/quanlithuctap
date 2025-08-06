@@ -26,7 +26,7 @@ public class MentorController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('MENTOR')")
+    @PreAuthorize("hasAnyRole('MENTOR', 'ADMIN', 'STUDENT')")
     public ResponseEntity<MentorResponse> getById(@PathVariable Integer id) {
         return ResponseEntity.ok(mentorService.getById(id));
     }

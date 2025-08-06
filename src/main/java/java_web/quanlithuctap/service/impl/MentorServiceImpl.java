@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,14 +35,20 @@ public class MentorServiceImpl implements MentorService {
     @Override
     public MentorResponse getById(Integer id) {
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        Mentor mentor = mentorRepo.findById(id).orElseThrow();
+        Mentor mentor = mentorRepo.findById(id).orElseThrow(() -> new RuntimeException("Mentor không tồn tại"));
 
-        if (!mentor.getUser().getUsername().equals(currentUsername)) {
-            throw new RuntimeException("Bạn chỉ được xem thông tin của mình.");
+        User currentUser = userRepo.findByUsername(currentUsername)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+        if (!mentor.getUser().getUsername().equals(currentUsername)
+                && currentUser.getRole() != User.Role.ADMIN
+                && currentUser.getRole() != User.Role.STUDENT) {
+            throw new RuntimeException("Bạn không có quyền xem thông tin này.");
         }
 
         return toDto(mentor);
     }
+
 
     @Override
     public MentorResponse createMentor(MentorRequest request) {
